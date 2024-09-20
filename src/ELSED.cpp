@@ -130,11 +130,10 @@ LineDetectionExtraInfoPtr ELSED::computeGradients(const cv::Mat &srcImg,
   return dstInfo;
 }
 
-inline void
-ELSED::computeAnchorPoints(const cv::Mat &dirImage, const cv::Mat &gradImage,
-                           int scanInterval, int anchorThresh,
-                           std::vector<Pixel> &anchorPoints) { // NOLINT
-
+inline void ELSED::computeAnchorPoints(const cv::Mat &dirImage,
+                                       const cv::Mat &gradImage,
+                                       int scanInterval, int anchorThresh,
+                                       std::vector<Pixel> &anchorPoints) {
   int imageWidth = gradImage.cols;
   int imageHeight = gradImage.rows;
 

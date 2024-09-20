@@ -72,7 +72,7 @@ public:
 
   SalientSegments detectSalient(const cv::Mat &image);
 
-  ImageEdges detectEdges(const cv::Mat &image); // NOLINT
+  ImageEdges detectEdges(const cv::Mat &image);
 
   const LineDetectionExtraInfo &getImgInfo() const;
 
@@ -85,7 +85,7 @@ public:
   static void computeAnchorPoints(const cv::Mat &dirImage,
                                   const cv::Mat &gradImage, int scanInterval,
                                   int anchorThresh,
-                                  std::vector<Pixel> &anchorPoints); // NOLINT
+                                  std::vector<Pixel> &anchorPoints);
 
   static LineDetectionExtraInfoPtr computeGradients(const cv::Mat &srcImg,
                                                     short gradientTh);
@@ -99,7 +99,7 @@ public:
 private:
   void drawAnchorPoints(const uint8_t *dirImg,
                         const std::vector<Pixel> &anchorPoints,
-                        uint8_t *pEdgeImg); // NOLINT
+                        uint8_t *pEdgeImg);
 
   ELSEDParams params;
   LineDetectionExtraInfoPtr imgInfo;
