@@ -1,10 +1,7 @@
 #ifndef ELSED_ELSED_H_
 #define ELSED_ELSED_H_
 
-#include <ostream>
-
 #include "EdgeDrawer.h"
-#include "FullSegmentInfo.h"
 
 namespace upm {
 

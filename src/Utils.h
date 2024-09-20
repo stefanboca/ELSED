@@ -2,7 +2,6 @@
 #define ELSED_UTILS_H_
 
 #include <opencv2/opencv.hpp>
-#include <ostream>
 
 #define UPM_ABS(x) ((x) >= 0 ? (x) : -(x))
 
