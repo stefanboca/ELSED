@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.28)
 project(pyelsed)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -26,3 +26,4 @@ add_subdirectory(pybind11)
 pybind11_add_module(pyelsed src/PYAPI.cpp)
 target_link_libraries(pyelsed PRIVATE ${OpenCV_LIBS} elsed)
 target_compile_definitions(pyelsed PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
+
