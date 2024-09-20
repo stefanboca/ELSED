@@ -1,31 +1,32 @@
 #ifndef ELSED_UTILS_H_
 #define ELSED_UTILS_H_
 
-#include <ostream>
 #include <opencv2/opencv.hpp>
+#include <ostream>
 
 #define UPM_ABS(x) ((x) >= 0 ? (x) : -(x))
 
-#define UPM_EDGE_VERTICAL   0
+#define UPM_EDGE_VERTICAL 0
 #define UPM_EDGE_HORIZONTAL 255
 
 #define UPM_ED_NO_EDGE_PIXEL 0
-#define UPM_ED_EDGE_PIXEL    255
-#define UPM_ED_ANCHOR_PIXEL  204
+#define UPM_ED_EDGE_PIXEL 255
+#define UPM_ED_ANCHOR_PIXEL 204
 #define UPM_ED_SEGMENT_INLIER_PX 153
 #define UPM_ED_SEGMENT_OUTLIER_PX 102
 #define UPM_ED_JUNTION_PX 152
 
-#define UPM_LEFT  1
+#define UPM_LEFT 1
 #define UPM_RIGHT 2
-#define UPM_UP    3
-#define UPM_DOWN  4
+#define UPM_UP 3
+#define UPM_DOWN 4
 
 #define UPM_SKIP_EDGE_PT 2
 #define UPM_MAX_OUTLIERS_TH 3
 
 namespace upm {
-// Line segment in format [x0, y0, x1, y1] where the endpoints are (x0, y0) and (x1, y1)
+// Line segment in format [x0, y0, x1, y1] where the endpoints are (x0, y0) and
+// (x1, y1)
 typedef cv::Vec4f Segment;
 typedef std::vector<Segment> Segments;
 
@@ -33,10 +34,10 @@ typedef std::vector<Segment> Segments;
  * Data structure containing the gradient information of an image
  */
 struct LineDetectionExtraInfo {
-  cv::Mat dxImg;   // Store the dxImg (horizontal gradient)
-  cv::Mat dyImg;   // Store the dyImg (vertical gradient)
-  cv::Mat gImg;    // Store the gradient image
-  cv::Mat dirImg;  // Store the direction image
+  cv::Mat dxImg;  // Store the dxImg (horizontal gradient)
+  cv::Mat dyImg;  // Store the dyImg (vertical gradient)
+  cv::Mat gImg;   // Store the gradient image
+  cv::Mat dirImg; // Store the direction image
 
   // image sizes
   unsigned int imageWidth;
@@ -60,9 +61,7 @@ struct Pixel {
   inline bool operator==(const Pixel &rhs) const {
     return x == rhs.x && y == rhs.y;
   }
-  inline bool operator!=(const Pixel &rhs) const {
-    return !(rhs == *this);
-  }
+  inline bool operator!=(const Pixel &rhs) const { return !(rhs == *this); }
 
   inline bool operator<(const Pixel &px2) const {
     // Compare the pixels by its squared L1 distance to the origin
@@ -82,7 +81,8 @@ struct SalientSegment {
   double salience;
 
   SalientSegment() = default;
-  SalientSegment(const Segment &segment, double salience) : segment(segment), salience(salience) {}
+  SalientSegment(const Segment &segment, double salience)
+      : segment(segment), salience(salience) {}
 
   inline bool operator<(const SalientSegment &rhs) const {
     if (salience == rhs.salience) {
@@ -90,7 +90,8 @@ struct SalientSegment {
       float dx2 = rhs.segment[0] - rhs.segment[2];
       float dy1 = segment[1] - segment[3];
       float dy2 = rhs.segment[1] - rhs.segment[3];
-      return std::sqrt(dx1 * dx1 + dy1 * dy1) > std::sqrt(dx2 * dx2 + dy2 * dy2);
+      return std::sqrt(dx1 * dx1 + dy1 * dy1) >
+             std::sqrt(dx2 * dx2 + dy2 * dy2);
     } else {
       return salience > rhs.salience;
     }
@@ -104,11 +105,11 @@ typedef std::vector<SalientSegment> SalientSegments;
  * Taking into account that 0 degrees is equivalent to 360
  * @param valueA
  * @param valueB
- * @param mod The number of elements in the circle (2 * PI to radians or 360 for degrees)
+ * @param mod The number of elements in the circle (2 * PI to radians or 360 for
+ * degrees)
  * @return
  */
-inline double
-circularDist(double valueA, double valueB, double mod = 360) {
+inline double circularDist(double valueA, double valueB, double mod = 360) {
   double a, b; // a is the small number and b the great number
   if (valueA < valueB) {
     a = valueA;
@@ -130,15 +131,15 @@ circularDist(double valueA, double valueB, double mod = 360) {
  * @param p The point which we want to calculate its projection over the line
  * @return The point p' which is the projection of p over the line.
  */
-inline cv::Point2f
-getProjectionPtn(const cv::Vec3f &l, const cv::Point2f &p) {
+inline cv::Point2f getProjectionPtn(const cv::Vec3f &l, const cv::Point2f &p) {
   const cv::Vec3f homoP(p.x, p.y, 1);
   if (l.dot(homoP) == 0) {
     // If the point is over the line return this same point
     return p;
   }
-  // Since the direction of l is (-l.b, l.a), the rotated 90 degrees vector will be: (l.a, l.b)
-  // The direction vector of the perpendicular rect we want to calc.
+  // Since the direction of l is (-l.b, l.a), the rotated 90 degrees vector will
+  // be: (l.a, l.b) The direction vector of the perpendicular rect we want to
+  // calc.
   const cv::Vec2f v2(l[0], l[1]);
   // Rect with direction v2 passing by point p
   const cv::Vec3f r2(v2[1], -v2[0], v2[0] * p.y - v2[1] * p.x);
@@ -152,8 +153,7 @@ getProjectionPtn(const cv::Vec3f &l, const cv::Point2f &p) {
  * @param s The input segment
  * @return The length of the segment
  */
-inline float
-segLength(const Segment &s) {
+inline float segLength(const Segment &s) {
   // The optimal way to do that, is to compute first the differences
   const float dx = s[0] - s[2];
   const float dy = s[1] - s[3];
@@ -167,14 +167,12 @@ segLength(const Segment &s) {
  * @return The angle that the segment forms with the X-axis in radians.
  * Range (pi/2, -pi/2].
  */
-inline float
-segAngle(const Segment &s) {
+inline float segAngle(const Segment &s) {
   if (s[2] > s[0])
     return std::atan2(s[3] - s[1], s[2] - s[0]);
   else
     return std::atan2(s[1] - s[3], s[0] - s[2]);
 }
-
 
 /**
  * Returns the line pixels using the Bresenham Algorithm:
@@ -214,7 +212,7 @@ static std::vector<Pixel> bresenham(int x0, int y0, int x1, int y1) {
       }
       // Increment the axis in which we are moving
       x += xIncrement;
-    }  // End of while
+    } // End of while
   } else {
     // Vertical like line
     p = 2 * dx - dy;
@@ -228,11 +226,11 @@ static std::vector<Pixel> bresenham(int x0, int y0, int x1, int y1) {
       }
       // Increment the axis in which we are moving
       y += yIncrement;
-    }  // End of while
+    } // End of while
   }
   pixels.emplace_back(x1, y1);
   return pixels;
 }
-}  // namespace upm
+} // namespace upm
 
-#endif  // ELSED_UTILS_H_
+#endif // ELSED_UTILS_H_

@@ -3,8 +3,8 @@
 
 #include <ostream>
 
-#include "FullSegmentInfo.h"
 #include "EdgeDrawer.h"
+#include "FullSegmentInfo.h"
 
 namespace upm {
 
@@ -28,15 +28,19 @@ struct ELSEDParams {
   int minLineLen = 15;
   // Threshold used to check if a list of edge points for a line segment
   double lineFitErrThreshold = 0.2;
-  // Threshold used to check if a new pixel is part of an already fit line segment
+  // Threshold used to check if a new pixel is part of an already fit line
+  // segment
   double pxToSegmentDistTh = 1.5;
-  // Threshold used to validate the junction jump region. The first eigenvalue of the gradient
-  // auto-correlation matrix should be at least junctionEigenvalsTh times bigger than the second eigenvalue
+  // Threshold used to validate the junction jump region. The first eigenvalue
+  // of the gradient auto-correlation matrix should be at least
+  // junctionEigenvalsTh times bigger than the second eigenvalue
   double junctionEigenvalsTh = 10;
-  // the difference between the perpendicular segment direction and the direction of the gradient
-  // in the region to be validated must be less than junctionAngleTh radians
+  // the difference between the perpendicular segment direction and the
+  // direction of the gradient in the region to be validated must be less than
+  // junctionAngleTh radians
   double junctionAngleTh = 10 * (M_PI / 180.0);
-  // The threshold over the validation criteria. For ELSED, it is the gradient angular error in pixels.
+  // The threshold over the validation criteria. For ELSED, it is the gradient
+  // angular error in pixels.
   double validationTh = 0.15;
 
   // Whether to validate or not the generated segments
@@ -52,25 +56,26 @@ struct ELSEDParams {
  *     @cite Suárez, I., Buenaposada, J. M., & Baumela, L. (2021).
  *     ELSED: Enhanced Line SEgment Drawing. arXiv preprint arXiv:2108.03144.
  *
- * It is an efficient line segment detector amenable to use in low power devices such as drones or smartphones.
- * The method takes an image as input and outputs a list of detected segments.
+ * It is an efficient line segment detector amenable to use in low power devices
+ * such as drones or smartphones. The method takes an image as input and outputs
+ * a list of detected segments.
  */
 class ELSED {
- public:
+public:
   // Constructor
   explicit ELSED(const ELSEDParams &params = ELSEDParams());
 
   /**
    * @brief Detects segments in the input image
-   * @param image An input image. The parameters are adapted to images of size 640x480.
-   * Bigger images will generate more segments.
+   * @param image An input image. The parameters are adapted to images of size
+   * 640x480. Bigger images will generate more segments.
    * @return The list of detected segments
    */
   Segments detect(const cv::Mat &image);
 
   SalientSegments detectSalient(const cv::Mat &image);
 
-  ImageEdges detectEdges(const cv::Mat &image);  // NOLINT
+  ImageEdges detectEdges(const cv::Mat &image); // NOLINT
 
   const LineDetectionExtraInfo &getImgInfo() const;
 
@@ -85,8 +90,8 @@ class ELSED {
                                   int anchorThresh,
                                   std::vector<Pixel> &anchorPoints); // NOLINT
 
-  static LineDetectionExtraInfoPtr
-  computeGradients(const cv::Mat &srcImg, short gradientTh);
+  static LineDetectionExtraInfoPtr computeGradients(const cv::Mat &srcImg,
+                                                    short gradientTh);
 
   ImageEdges getAllEdges() const;
 
@@ -94,10 +99,10 @@ class ELSED {
 
   const EdgeDrawerPtr &getDrawer() const { return drawer; }
 
- private:
+private:
   void drawAnchorPoints(const uint8_t *dirImg,
                         const std::vector<Pixel> &anchorPoints,
-                        uint8_t *pEdgeImg);  // NOLINT
+                        uint8_t *pEdgeImg); // NOLINT
 
   ELSEDParams params;
   LineDetectionExtraInfoPtr imgInfo;
@@ -109,5 +114,5 @@ class ELSED {
   cv::Mat blurredImg;
   cv::Mat edgeImg;
 };
-}
-#endif //ELSED_ELSED_H_
+} // namespace upm
+#endif // ELSED_ELSED_H_

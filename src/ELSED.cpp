@@ -1,24 +1,25 @@
 #include "ELSED.h"
 #include "EdgeDrawer.h"
 
-// Decides if we should take the image gradients as the interpolated version of the pixels right in the segment
-// or if they are ready directly from the image
+// Decides if we should take the image gradients as the interpolated version of
+// the pixels right in the segment or if they are ready directly from the image
 #define UPM_SD_USE_REPROJECTION
 
 namespace upm {
 
-ELSED::ELSED(const ELSEDParams &params) : params(params) {
-}
+ELSED::ELSED(const ELSEDParams &params) : params(params) {}
 
 Segments ELSED::detect(const cv::Mat &image) {
   processImage(image);
-  // std::cout << "ELSED detected: " << segments.size() << " segments" << std::endl;
+  // std::cout << "ELSED detected: " << segments.size() << " segments" <<
+  // std::endl;
   return segments;
 }
 
 SalientSegments ELSED::detectSalient(const cv::Mat &image) {
   processImage(image);
-  // std::cout << "ELSED detected: " << salientSegments.size() << " salient segments" << std::endl;
+  // std::cout << "ELSED detected: " << salientSegments.size() << " salient
+  // segments" << std::endl;
   return salientSegments;
 }
 
@@ -27,23 +28,21 @@ ImageEdges ELSED::detectEdges(const cv::Mat &image) {
   return getSegmentEdges();
 }
 
-const LineDetectionExtraInfo &ELSED::getImgInfo() const {
-  return *imgInfo;
-}
+const LineDetectionExtraInfo &ELSED::getImgInfo() const { return *imgInfo; }
 
 void ELSED::processImage(const cv::Mat &_image) {
   // Check that the image is a grayscale image
   cv::Mat image;
   switch (_image.channels()) {
-    case 3:
-      cv::cvtColor(_image, image, cv::COLOR_BGR2GRAY);
-      break;
-    case 4:
-      cv::cvtColor(_image, image, cv::COLOR_BGRA2GRAY);
-      break;
-    default:
-      image = _image;
-      break;
+  case 3:
+    cv::cvtColor(_image, image, cv::COLOR_BGR2GRAY);
+    break;
+  case 4:
+    cv::cvtColor(_image, image, cv::COLOR_BGRA2GRAY);
+    break;
+  default:
+    image = _image;
+    break;
   }
   assert(image.channels() == 1);
   // Clear previous state
@@ -56,7 +55,8 @@ void ELSED::processImage(const cv::Mat &_image) {
   // Set the global image
   // Filter the image
   if (params.ksize > 2) {
-    cv::GaussianBlur(image, blurredImg, cv::Size(params.ksize, params.ksize), params.sigma);
+    cv::GaussianBlur(image, blurredImg, cv::Size(params.ksize, params.ksize),
+                     params.sigma);
   } else {
     blurredImg = image;
   }
@@ -75,30 +75,30 @@ void ELSED::processImage(const cv::Mat &_image) {
     // If we couldn't find any anchor, decrease the anchor threshold
     if (anchors.empty()) {
       // std::cout << "Cannot find any anchor with AnchorTh = " << int(anchorTh)
-      //      << ", repeating process with AnchorTh = " << (anchorTh / 2) << std::endl;
+      //      << ", repeating process with AnchorTh = " << (anchorTh / 2) <<
+      //      std::endl;
       anchorTh /= 2;
     }
 
   } while (anchors.empty() && !anchoThIsZero);
   // LOGD << "Detected " << anchors.size() << " anchor points ";
   edgeImg = cv::Mat::zeros(imgInfo->imageHeight, imgInfo->imageWidth, CV_8UC1);
-  drawer = std::make_shared<EdgeDrawer>(imgInfo,
-                                        edgeImg,
-                                        params.lineFitErrThreshold,
-                                        params.pxToSegmentDistTh,
-                                        params.minLineLen,
-                                        params.treatJunctions,
-                                        params.listJunctionSizes,
-                                        params.junctionEigenvalsTh,
-                                        params.junctionAngleTh);
+  drawer = std::make_shared<EdgeDrawer>(
+      imgInfo, edgeImg, params.lineFitErrThreshold, params.pxToSegmentDistTh,
+      params.minLineLen, params.treatJunctions, params.listJunctionSizes,
+      params.junctionEigenvalsTh, params.junctionAngleTh);
 
   drawAnchorPoints(imgInfo->dirImg.ptr(), anchors, edgeImg.ptr());
 }
 
-LineDetectionExtraInfoPtr ELSED::computeGradients(const cv::Mat &srcImg, short gradientTh) {
-  LineDetectionExtraInfoPtr dstInfo = std::make_shared<LineDetectionExtraInfo>();
-  cv::Sobel(srcImg, dstInfo->dxImg, CV_16SC1, 1, 0, 3, 1, 0, cv::BORDER_REPLICATE);
-  cv::Sobel(srcImg, dstInfo->dyImg, CV_16SC1, 0, 1, 3, 1, 0, cv::BORDER_REPLICATE);
+LineDetectionExtraInfoPtr ELSED::computeGradients(const cv::Mat &srcImg,
+                                                  short gradientTh) {
+  LineDetectionExtraInfoPtr dstInfo =
+      std::make_shared<LineDetectionExtraInfo>();
+  cv::Sobel(srcImg, dstInfo->dxImg, CV_16SC1, 1, 0, 3, 1, 0,
+            cv::BORDER_REPLICATE);
+  cv::Sobel(srcImg, dstInfo->dyImg, CV_16SC1, 0, 1, 3, 1, 0,
+            cv::BORDER_REPLICATE);
 
   int nRows = srcImg.rows;
   int nCols = srcImg.cols;
@@ -155,15 +155,18 @@ ELSED::computeAnchorPoints(const cv::Mat &dirImage, const cv::Mat &gradImage,
       indexInArray = h * imageWidth + w;
 
       // If there is no gradient in the pixel avoid the anchor generation
-      if (gradImg[indexInArray] == 0) continue;
+      if (gradImg[indexInArray] == 0)
+        continue;
 
       // To be an Anchor the pixel must have a gradient magnitude
       // anchorThreshold_ units higher than that of its neighbours
       if (dirImg[indexInArray] == UPM_EDGE_HORIZONTAL) {
         // Check if (w, h) is accepted as an anchor using the Anchor Threshold.
         // We compare with the top and bottom pixel gradients
-        if (gradImg[indexInArray] >= gradImg[indexInArray - imageWidth] + anchorThresh &&
-            gradImg[indexInArray] >= gradImg[indexInArray + imageWidth] + anchorThresh) {
+        if (gradImg[indexInArray] >=
+                gradImg[indexInArray - imageWidth] + anchorThresh &&
+            gradImg[indexInArray] >=
+                gradImg[indexInArray + imageWidth] + anchorThresh) {
           anchorPoints[nAnchors].x = w;
           anchorPoints[nAnchors].y = h;
           nAnchors++;
@@ -202,8 +205,10 @@ inline int calculateNumPtsToTrim(int nPoints) {
 // and t the point offset between e and s in range [0, 1]
 inline float lerp(float s, float e, float t) { return s + (e - s) * t; }
 
-// Bi-linear interpolation of point (tx, ty) in the cell with corner values [[c00, c01], [c10, c11]]
-inline float blerp(float c00, float c10, float c01, float c11, float tx, float ty) {
+// Bi-linear interpolation of point (tx, ty) in the cell with corner values
+// [[c00, c01], [c10, c11]]
+inline float blerp(float c00, float c10, float c01, float c11, float tx,
+                   float ty) {
   return lerp(lerp(c00, c10, tx), lerp(c01, c11, tx), ty);
 }
 
@@ -219,7 +224,7 @@ void ELSED::drawAnchorPoints(const uint8_t *dirImg,
   int imageHeight = imgInfo->imageHeight;
   bool expandHorizontally;
   int indexInArray;
-  unsigned char lastDirection;  // up = 1, right = 2, down = 3, left = 4;
+  unsigned char lastDirection; // up = 1, right = 2, down = 3, left = 4;
 
   if (anchorPoints.empty()) {
     // No anchor points detected in the image
@@ -228,7 +233,7 @@ void ELSED::drawAnchorPoints(const uint8_t *dirImg,
 
   const double validationTh = params.validationTh;
 
-  for (const auto &anchorPoint: anchorPoints) {
+  for (const auto &anchorPoint : anchorPoints) {
     // LOGD << "Managing new Anchor point: " << anchorPoint;
     indexInArray = anchorPoint.y * imageWidth + anchorPoint.x;
 
@@ -262,7 +267,7 @@ void ELSED::drawAnchorPoints(const uint8_t *dirImg,
   segments.reserve(drawer->getDetectedFullSegments().size());
   salientSegments.reserve(drawer->getDetectedFullSegments().size());
 
-  for (const FullSegmentInfo &detectedSeg: drawer->getDetectedFullSegments()) {
+  for (const FullSegmentInfo &detectedSeg : drawer->getDetectedFullSegments()) {
 
     valid = true;
     if (params.validate) {
@@ -273,8 +278,10 @@ void ELSED::drawAnchorPoints(const uint8_t *dirImg,
         Segment s = detectedSeg.getEndpoints();
         theta = segAngle(s) + M_PI_2;
         // Force theta to be in range [0, M_PI)
-        while (theta < 0) theta += M_PI;
-        while (theta >= M_PI) theta -= M_PI;
+        while (theta < 0)
+          theta += M_PI;
+        while (theta >= M_PI)
+          theta -= M_PI;
 
         // Calculate the line equation as the cross product os the endpoints
         cv::Vec3f l = cv::Vec3f(s[0], s[1], 1).cross(cv::Vec3f(s[2], s[3], 1));
@@ -291,36 +298,43 @@ void ELSED::drawAnchorPoints(const uint8_t *dirImg,
         nOriInliers = 0;
         nOriOutliers = 0;
 
-        for (auto px: detectedSeg) {
+        for (auto px : detectedSeg) {
 
           // If the point is not an inlier avoid it
           if (edgeImg.at<uint8_t>(px.y, px.x) != UPM_ED_SEGMENT_INLIER_PX) {
             continue;
           }
 
-          endpointDist = detectedSeg.horizontal() ?
-                         std::min(std::abs(px.x - lastPx.x), std::abs(px.x - firstPx.x)) :
-                         std::min(std::abs(px.y - lastPx.y), std::abs(px.y - firstPx.y));
+          endpointDist = detectedSeg.horizontal()
+                             ? std::min(std::abs(px.x - lastPx.x),
+                                        std::abs(px.x - firstPx.x))
+                             : std::min(std::abs(px.y - lastPx.y),
+                                        std::abs(px.y - firstPx.y));
 
           if (endpointDist < nPixelsToTrim) {
             continue;
           }
 
 #ifdef UPM_SD_USE_REPROJECTION
-          // Re-project the point into the segment. To do this, we should move pixel.dot(l)
-          // units (the distance between the pixel and the segment) in the direction
-          // perpendicular to the segment (perpDir).
-          p = cv::Point2f(px.x, px.y) - perpDir * cv::Vec3f(px.x, px.y, 1).dot(l);
+          // Re-project the point into the segment. To do this, we should move
+          // pixel.dot(l) units (the distance between the pixel and the segment)
+          // in the direction perpendicular to the segment (perpDir).
+          p = cv::Point2f(px.x, px.y) -
+              perpDir * cv::Vec3f(px.x, px.y, 1).dot(l);
           // Get the values around the point p to do the bi-linear interpolation
           x0 = p.x < 0 ? 0 : p.x;
-          if (x0 >= imageWidth) x0 = imageWidth - 1;
+          if (x0 >= imageWidth)
+            x0 = imageWidth - 1;
           y0 = p.y < 0 ? 0 : p.y;
-          if (y0 >= imageHeight) y0 = imageHeight - 1;
+          if (y0 >= imageHeight)
+            y0 = imageHeight - 1;
           x1 = p.x + 1;
-          if (x1 >= imageWidth) x1 = imageWidth - 1;
+          if (x1 >= imageWidth)
+            x1 = imageWidth - 1;
           y1 = p.y + 1;
-          if (y1 >= imageHeight) y1 = imageHeight - 1;
-          //Bi-linear interpolation of Dx and Dy
+          if (y1 >= imageHeight)
+            y1 = imageHeight - 1;
+          // Bi-linear interpolation of Dx and Dy
           lerp_dx = blerp(pDx[y0 * imageWidth + x0], pDx[y0 * imageWidth + x1],
                           pDx[y1 * imageWidth + x0], pDx[y1 * imageWidth + x1],
                           p.x - int(p.x), p.y - int(p.y));
@@ -334,9 +348,12 @@ void ELSED::drawAnchorPoints(const uint8_t *dirImg,
           angle = std::atan2(pDy[indexInArray], pDx[indexInArray]);
 #endif
           // Force theta to be in range [0, M_PI)
-          if (angle < 0) angle += M_PI;
-          if (angle >= M_PI) angle -= M_PI;
-          circularDist(theta, angle, M_PI) > validationTh ? nOriOutliers++ : nOriInliers++;
+          if (angle < 0)
+            angle += M_PI;
+          if (angle >= M_PI)
+            angle -= M_PI;
+          circularDist(theta, angle, M_PI) > validationTh ? nOriOutliers++
+                                                          : nOriInliers++;
         }
 
         valid = nOriInliers > nOriOutliers;
@@ -356,7 +373,7 @@ void ELSED::drawAnchorPoints(const uint8_t *dirImg,
 ImageEdges ELSED::getAllEdges() const {
   assert(drawer);
   ImageEdges result;
-  for (const FullSegmentInfo &s: drawer->getDetectedFullSegments())
+  for (const FullSegmentInfo &s : drawer->getDetectedFullSegments())
     result.push_back(s.getPixels());
   return result;
 }
@@ -364,7 +381,7 @@ ImageEdges ELSED::getAllEdges() const {
 ImageEdges ELSED::getSegmentEdges() const {
   assert(drawer);
   ImageEdges result;
-  for (const FullSegmentInfo &s: drawer->getDetectedFullSegments())
+  for (const FullSegmentInfo &s : drawer->getDetectedFullSegments())
     result.push_back(s.getPixels());
   return result;
 }
@@ -373,4 +390,4 @@ const LineDetectionExtraInfoPtr &ELSED::getImgInfoPtr() const {
   return imgInfo;
 }
 
-}  // namespace upm
+} // namespace upm

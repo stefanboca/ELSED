@@ -1,8 +1,8 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
+#include <ELSED.h>
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <ELSED.h>
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace upm;
@@ -23,23 +23,20 @@ inline py::tuple salient_segments_to_py(const upm::SalientSegments &ssegs) {
   return pybind11::make_tuple(segments, scores);
 }
 
-py::tuple compute_elsed(const py::array &py_img,
-                        float sigma = 1,
-                        float gradientThreshold = 30,
-                        int minLineLen = 15,
+py::tuple compute_elsed(const py::array &py_img, float sigma = 1,
+                        float gradientThreshold = 30, int minLineLen = 15,
                         double lineFitErrThreshold = 0.2,
                         double pxToSegmentDistTh = 1.5,
-                        double validationTh = 0.15,
-                        bool validate = true,
-                        bool treatJunctions = true
-) {
+                        double validationTh = 0.15, bool validate = true,
+                        bool treatJunctions = true) {
 
   py::buffer_info info = py_img.request();
-  cv::Mat img(info.shape[0], info.shape[1], CV_8UC1, (uint8_t *) info.ptr);
+  cv::Mat img(info.shape[0], info.shape[1], CV_8UC1, (uint8_t *)info.ptr);
   ELSEDParams params;
 
   params.sigma = sigma;
-  params.ksize = cvRound(sigma * 3 * 2 + 1) | 1; // Automatic kernel size detection
+  params.ksize =
+      cvRound(sigma * 3 * 2 + 1) | 1; // Automatic kernel size detection
   params.gradientThreshold = gradientThreshold;
   params.minLineLen = minLineLen;
   params.lineFitErrThreshold = lineFitErrThreshold;
@@ -58,14 +55,8 @@ PYBIND11_MODULE(pyelsed, m) {
   m.def("detect", &compute_elsed, R"pbdoc(
         Computes ELSED: Enhanced Line SEgment Drawing in the input image.
     )pbdoc",
-        py::arg("img"),
-        py::arg("sigma") = 1,
-        py::arg("gradientThreshold") = 30,
-        py::arg("minLineLen") = 15,
-        py::arg("lineFitErrThreshold") = 0.2,
-        py::arg("pxToSegmentDistTh") = 1.5,
-        py::arg("validationTh") = 0.15,
-        py::arg("validate") = true,
-        py::arg("treatJunctions") = true
-  );
+        py::arg("img"), py::arg("sigma") = 1, py::arg("gradientThreshold") = 30,
+        py::arg("minLineLen") = 15, py::arg("lineFitErrThreshold") = 0.2,
+        py::arg("pxToSegmentDistTh") = 1.5, py::arg("validationTh") = 0.15,
+        py::arg("validate") = true, py::arg("treatJunctions") = true);
 }

@@ -1,11 +1,13 @@
-#include <vector>
 #include "FullSegmentInfo.h"
+#include <vector>
 
 namespace upm {
 
-FullSegmentInfo::FullSegmentInfo(const std::vector<Pixel> &pts) : pixels(&pts) {}
+FullSegmentInfo::FullSegmentInfo(const std::vector<Pixel> &pts)
+    : pixels(&pts) {}
 
-FullSegmentInfo::FullSegmentInfo(const std::vector<Pixel> &pts, int startIdx) : pixels(&pts) {
+FullSegmentInfo::FullSegmentInfo(const std::vector<Pixel> &pts, int startIdx)
+    : pixels(&pts) {
   init(pts, startIdx);
 }
 
@@ -33,14 +35,16 @@ void FullSegmentInfo::init(const std::vector<Pixel> &pts, int startIdx) {
 }
 
 void FullSegmentInfo::skipPositions() {
-  static_assert(UPM_SKIP_EDGE_PT == 2, "Error this code is optimized for UPM_SKIP_EDGE_PT = 2");
+  static_assert(UPM_SKIP_EDGE_PT == 2,
+                "Error this code is optimized for UPM_SKIP_EDGE_PT = 2");
   assert(pixels->size() == lastPxIndex + 1 + UPM_SKIP_EDGE_PT);
 
   // Remove the last UPM_SKIP_EDGE_PT of the model (here UPM_SKIP_EDGE_PT == 2)
   subtractPointFromModel(firstPx);
   subtractPointFromModel(prevFirstPx);
 
-  // Update the indices of the pixels we are using in the vector of pixels. Move all the indices
+  // Update the indices of the pixels we are using in the vector of pixels. Move
+  // all the indices
   firstPxIndex += UPM_SKIP_EDGE_PT;
   lastPxIndex += UPM_SKIP_EDGE_PT;
   firstPx = (*pixels)[firstPxIndex];
@@ -61,7 +65,8 @@ void FullSegmentInfo::skipPositions() {
   }
 }
 
-void FullSegmentInfo::addPixel(int x, int y, int pixelIndexInEdge, bool isPixelAtTheEnd) {
+void FullSegmentInfo::addPixel(int x, int y, int pixelIndexInEdge,
+                               bool isPixelAtTheEnd) {
   leastSquaresLineFitNewPoint(x, y);
   assert(!std::isnan(equation[0]) && !std::isnan(equation[1]));
 
@@ -89,9 +94,9 @@ void FullSegmentInfo::finish() {
 
 inline void FullSegmentInfo::calcSegmentEndpoints() {
   // At last, compute the line endpoints and store them. We project the first
-  // and last pixels in the pixelChain onto the best fit line to get the line endpoints.
-  // xp= (w2^2 * x0 -w1*w2 * y0 -w3 * w1)
-  // yp= (w1^2 * y0 -w1*w2 * x0 -w3 * w2)
+  // and last pixels in the pixelChain onto the best fit line to get the line
+  // endpoints. xp= (w2^2 * x0 -w1*w2 * y0 -w3 * w1) yp= (w1^2 * y0 -w1*w2 * x0
+  // -w3 * w2)
   float a1 = equation[1] * equation[1];
   float a2 = equation[0] * equation[0];
   float a3 = equation[0] * equation[1];
@@ -101,14 +106,14 @@ inline void FullSegmentInfo::calcSegmentEndpoints() {
   const Pixel &firstPx = getFirstPixel();
   int Px = firstPx.x;
   int Py = firstPx.y;
-  endpoints[0] = a1 * Px - a3 * Py - a4;  // x
-  endpoints[1] = a2 * Py - a3 * Px - a5;  // y
+  endpoints[0] = a1 * Px - a3 * Py - a4; // x
+  endpoints[1] = a2 * Py - a3 * Px - a5; // y
   // Last pixel
   const Pixel &secondPx = getLastPixel();
   Px = secondPx.x;
   Py = secondPx.y;
-  endpoints[2] = a1 * Px - a3 * Py - a4;  // x
-  endpoints[3] = a2 * Py - a3 * Px - a5;  // y
+  endpoints[2] = a1 * Px - a3 * Py - a4; // x
+  endpoints[3] = a2 * Py - a3 * Px - a5; // y
 }
 
 ImageEdge FullSegmentInfo::getPixels() const {
@@ -116,7 +121,7 @@ ImageEdge FullSegmentInfo::getPixels() const {
   ImageEdge result;
   result.reserve(getNumOfPixels());
   // Copy the elements to the destination vector
-  for (const Pixel &px: *this)
+  for (const Pixel &px : *this)
     result.push_back(px);
   return result;
 }
@@ -139,7 +144,8 @@ void FullSegmentInfo::removeLastPx(bool removeFromTheEnd) {
   lastPxIndex--;
 }
 
-inline void FullSegmentInfo::leastSquareLineFit(const std::vector<Pixel> &pts, int startIdx) {
+inline void FullSegmentInfo::leastSquareLineFit(const std::vector<Pixel> &pts,
+                                                int startIdx) {
   int i, indpCoord, depCoord;
   sum_x_i = 0, sum_y_i = 0, sum_x_i_y_i = 0, sum_x_i_2 = 0;
   N = pts.size() - startIdx;
@@ -212,7 +218,8 @@ inline void FullSegmentInfo::calculateLineEq() {
   }
 
   // Normalize the line equation
-  equation *= (1 / std::sqrt(equation[0] * equation[0] + equation[1] * equation[1]));
+  equation *=
+      (1 / std::sqrt(equation[0] * equation[0] + equation[1] * equation[1]));
 
   // Fix the line equation
   if (dx * -equation[1] + dy * equation[0] < 0) {
@@ -222,4 +229,4 @@ inline void FullSegmentInfo::calculateLineEq() {
   }
 }
 
-}
+} // namespace upm
