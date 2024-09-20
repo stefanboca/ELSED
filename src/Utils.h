@@ -35,7 +35,6 @@ typedef std::vector<Segment> Segments;
 struct LineDetectionExtraInfo {
   cv::Mat dxImg;   // Store the dxImg (horizontal gradient)
   cv::Mat dyImg;   // Store the dyImg (vertical gradient)
-  cv::Mat gImgWO;  // Store the gradient image without threshold
   cv::Mat gImg;    // Store the gradient image
   cv::Mat dirImg;  // Store the direction image
 

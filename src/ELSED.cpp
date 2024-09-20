@@ -69,12 +69,8 @@ void ELSED::processImage(const cv::Mat &_image) {
   do {
     anchoThIsZero = anchorTh == 0;
     // Detect edges and segment in the input image
-    computeAnchorPoints(imgInfo->dirImg,
-                        imgInfo->gImgWO,
-                        imgInfo->gImg,
-                        params.scanIntervals,
-                        anchorTh,
-                        anchors);
+    computeAnchorPoints(imgInfo->dirImg, imgInfo->gImg, params.scanIntervals,
+                        anchorTh, anchors);
 
     // If we couldn't find any anchor, decrease the anchor threshold
     if (anchors.empty()) {
@@ -110,14 +106,12 @@ LineDetectionExtraInfoPtr ELSED::computeGradients(const cv::Mat &srcImg, short g
 
   dstInfo->imageWidth = srcImg.cols;
   dstInfo->imageHeight = srcImg.rows;
-  dstInfo->gImgWO = cv::Mat(srcImg.size(), dstInfo->dxImg.type());
   dstInfo->gImg = cv::Mat(srcImg.size(), dstInfo->dxImg.type());
   dstInfo->dirImg = cv::Mat(srcImg.size(), CV_8UC1);
 
   const int16_t *pDX = dstInfo->dxImg.ptr<int16_t>();
   const int16_t *pDY = dstInfo->dyImg.ptr<int16_t>();
   auto *pGr = dstInfo->gImg.ptr<int16_t>();
-  auto *pGrWO = dstInfo->gImgWO.ptr<int16_t>();
   auto *pDir = dstInfo->dirImg.ptr<uchar>();
   int16_t abs_dx, abs_dy, sum;
   const int totSize = nRows * nCols;
@@ -128,7 +122,6 @@ LineDetectionExtraInfoPtr ELSED::computeGradients(const cv::Mat &srcImg, short g
     abs_dy = UPM_ABS(pDY[i]);
     sum = abs_dx + abs_dy;
     // Divide by 2 the gradient
-    pGrWO[i] = sum;
     pGr[i] = sum < gradientTh ? 0 : sum;
     // Select between vertical or horizontal gradient
     pDir[i] = abs_dx >= abs_dy ? UPM_EDGE_VERTICAL : UPM_EDGE_HORIZONTAL;
@@ -137,12 +130,10 @@ LineDetectionExtraInfoPtr ELSED::computeGradients(const cv::Mat &srcImg, short g
   return dstInfo;
 }
 
-inline void ELSED::computeAnchorPoints(const cv::Mat &dirImage,
-                                       const cv::Mat &gradImageWO,
-                                       const cv::Mat &gradImage,
-                                       int scanInterval,
-                                       int anchorThresh,
-                                       std::vector<Pixel> &anchorPoints) {  // NOLINT
+inline void
+ELSED::computeAnchorPoints(const cv::Mat &dirImage, const cv::Mat &gradImage,
+                           int scanInterval, int anchorThresh,
+                           std::vector<Pixel> &anchorPoints) { // NOLINT
 
   int imageWidth = gradImage.cols;
   int imageHeight = gradImage.rows;

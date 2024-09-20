@@ -81,11 +81,9 @@ class ELSED {
   void clear();
 
   static void computeAnchorPoints(const cv::Mat &dirImage,
-                                  const cv::Mat &gradImageWO,
-                                  const cv::Mat &gradImage,
-                                  int scanInterval,
+                                  const cv::Mat &gradImage, int scanInterval,
                                   int anchorThresh,
-                                  std::vector<Pixel> &anchorPoints);  // NOLINT
+                                  std::vector<Pixel> &anchorPoints); // NOLINT
 
   static LineDetectionExtraInfoPtr
   computeGradients(const cv::Mat &srcImg, short gradientTh);
